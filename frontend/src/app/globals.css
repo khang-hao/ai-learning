@@ -109,3 +109,50 @@ select {
   font-size: 0.92em;
   font-weight: 700;
 }
+
+.study-output__inline-code {
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.45rem;
+  background: rgba(24, 74, 69, 0.08);
+  color: #184a45;
+  font-size: 0.92em;
+}
+
+.study-output__table-shell {
+  margin: 0 0 22px 0;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(24, 74, 69, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.study-output__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.study-output__table th,
+.study-output__table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(24, 74, 69, 0.12);
+  line-height: 1.7;
+}
+
+.study-output__table th {
+  background: rgba(24, 74, 69, 0.08);
+  color: var(--accent);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.study-output__table tbody tr:nth-child(even) td {
+  background: rgba(24, 74, 69, 0.03);
+}
+
+.study-output__table tbody tr:last-child td {
+  border-bottom: none;
+}

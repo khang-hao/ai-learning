@@ -14,7 +14,10 @@ No paid API key is required for Phase 1.
 
 ## Current Status
 
-The Phase 1 code has been updated from the old OpenAI version to an **Ollama version**.
+The project now has:
+
+- **Phase 1**: upload, indexing, retrieval, grounded Q&A with citations
+- **Phase 2**: summary, explain simply, quiz, compare topics, revision checklist
 
 Phase 1 is considered truly complete only when you can:
 
@@ -39,6 +42,19 @@ Phase 1 is the core RAG pipeline.
 8. backend retrieves the most relevant chunks
 9. backend sends those chunks to an Ollama chat model
 10. app returns the answer and citations
+
+## What Phase 2 Adds
+
+Phase 2 reuses the same retrieval pipeline for more study workflows.
+
+- `summarize`: produce structured study notes for a topic
+- `explain simply`: rewrite a concept in beginner-friendly language
+- `quiz`: generate short-answer practice questions with answer keys
+- `compare`: compare two topics with similarities, differences, and confusion points
+- `checklist`: generate a revision checklist grouped by what to review
+
+The important idea is that Phase 2 does **not** build a new AI system. It reuses the
+same RAG foundation from Phase 1 and changes the task prompt.
 
 ## Phase 1 Tech Stack
 
@@ -429,15 +445,24 @@ Phase 1 is truly done when:
 
 Until then, treat Phase 1 as implemented but not fully verified.
 
-## What Comes After Phase 1
+## How To Know Phase 2 Is Really Done
 
-After this works, the next steps are:
+Phase 2 is working well when:
 
-1. improve retrieval quality
-2. add better summary and quiz flows
-3. add task routing
-4. later add one multimodal feature
-5. later add one PyTorch-trained component
+1. all study modes return responses without crashing
+2. summaries are structured and grounded in retrieved material
+3. quizzes use the uploaded material instead of generic model knowledge
+4. comparisons discuss both requested topics clearly
+5. checklists are actionable for revision
+
+## What Comes After Phase 2
+
+After this, the next steps are:
+
+1. improve retrieval quality and prompt quality
+2. add simple task routing
+3. add one multimodal feature
+4. add one PyTorch-trained component
 
 ## Official References
 

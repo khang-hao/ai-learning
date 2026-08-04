@@ -11,9 +11,25 @@ class SummaryRequest(BaseModel):
     top_k: int = Field(default=6, ge=1, le=10)
 
 
+class ExplainSimpleRequest(BaseModel):
+    topic: str = Field(default="overall course material", min_length=3)
+    top_k: int = Field(default=6, ge=1, le=10)
+
+
 class QuizRequest(BaseModel):
     topic: str = Field(default="overall course material", min_length=3)
     question_count: int = Field(default=5, ge=3, le=10)
+    top_k: int = Field(default=6, ge=1, le=10)
+
+
+class CompareRequest(BaseModel):
+    topic_a: str = Field(min_length=2)
+    topic_b: str = Field(min_length=2)
+    top_k: int = Field(default=8, ge=2, le=12)
+
+
+class ChecklistRequest(BaseModel):
+    topic: str = Field(default="overall course material", min_length=3)
     top_k: int = Field(default=6, ge=1, le=10)
 
 

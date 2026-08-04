@@ -3,7 +3,14 @@
 import type { CSSProperties } from "react";
 import { useState } from "react";
 
-import { askQuestion, generateQuiz, generateSummary } from "@/lib/api";
+import {
+  askQuestion,
+  compareTopics,
+  explainSimply,
+  generateChecklist,
+  generateQuiz,
+  generateSummary,
+} from "@/lib/api";
 import { StudyResult } from "@/components/study-result";
 import type { Citation, StoredDocument } from "@/types/api";
 
@@ -11,11 +18,12 @@ type StudyPanelProps = {
   documents: StoredDocument[];
 };
 
-type Mode = "ask" | "summarize" | "quiz";
+type Mode = "ask" | "summarize" | "explain" | "quiz" | "compare" | "checklist";
 
 export function StudyPanel({ documents }: StudyPanelProps) {
   const [mode, setMode] = useState<Mode>("ask");
   const [prompt, setPrompt] = useState("");
+  const [secondaryPrompt, setSecondaryPrompt] = useState("");
   const [result, setResult] = useState("");
   const [citations, setCitations] = useState<Citation[]>([]);
   const [busy, setBusy] = useState(false);
@@ -26,6 +34,11 @@ export function StudyPanel({ documents }: StudyPanelProps) {
       return;
     }
 
+    if (mode === "compare" && !secondaryPrompt.trim()) {
+      setResult("Enter the second topic to compare.");
+      return;
+    }
+
     try {
       setBusy(true);
       const response =
@@ -33,7 +46,13 @@ export function StudyPanel({ documents }: StudyPanelProps) {
           ? await askQuestion(prompt)
           : mode === "summarize"
             ? await generateSummary(prompt)
-            : await generateQuiz(prompt);
+            : mode === "explain"
+              ? await explainSimply(prompt)
+              : mode === "quiz"
+                ? await generateQuiz(prompt)
+                : mode === "compare"
+                  ? await compareTopics(prompt, secondaryPrompt)
+                  : await generateChecklist(prompt);
 
       setResult(response.answer);
       setCitations(response.citations);
@@ -60,7 +79,10 @@ export function StudyPanel({ documents }: StudyPanelProps) {
       >
         <option value="ask">Ask a question</option>
         <option value="summarize">Generate a summary</option>
+        <option value="explain">Explain simply</option>
         <option value="quiz">Generate a quiz</option>
+        <option value="compare">Compare two topics</option>
+        <option value="checklist">Revision checklist</option>
       </select>
 
       <textarea
@@ -72,10 +94,26 @@ export function StudyPanel({ documents }: StudyPanelProps) {
             ? "What is backpropagation and why does it work?"
             : mode === "summarize"
               ? "Neural network optimization"
-              : "Gradient descent"
+              : mode === "explain"
+                ? "Dynamic programming"
+                : mode === "quiz"
+                  ? "Gradient descent"
+                  : mode === "compare"
+                    ? "Stacks"
+                    : "Binary search trees"
         }
         style={inputStyle}
       />
+
+      {mode === "compare" ? (
+        <textarea
+          rows={3}
+          value={secondaryPrompt}
+          onChange={(event) => setSecondaryPrompt(event.target.value)}
+          placeholder="Queues"
+          style={inputStyle}
+        />
+      ) : null}
 
       <button
         type="button"
@@ -92,7 +130,7 @@ export function StudyPanel({ documents }: StudyPanelProps) {
             <p style={eyebrowStyle}>Study Output</p>
             <h3 style={{ margin: "4px 0 0 0" }}>Result</h3>
           </div>
-          <span style={modeBadgeStyle}>{mode}</span>
+          <span style={modeBadgeStyle}>{getModeLabel(mode)}</span>
         </div>
         <div style={resultBoxStyle}>
           <StudyResult text={result} />
@@ -126,6 +164,23 @@ export function StudyPanel({ documents }: StudyPanelProps) {
       </div>
     </section>
   );
+}
+
+function getModeLabel(mode: Mode): string {
+  switch (mode) {
+    case "ask":
+      return "Q&A";
+    case "summarize":
+      return "Summary";
+    case "explain":
+      return "Explain Simply";
+    case "quiz":
+      return "Quiz";
+    case "compare":
+      return "Compare";
+    case "checklist":
+      return "Checklist";
+  }
 }
 
 const panelStyle: CSSProperties = {
@@ -194,7 +249,6 @@ const modeBadgeStyle: CSSProperties = {
   borderRadius: 999,
   background: "rgba(24, 74, 69, 0.1)",
   color: "var(--accent)",
-  textTransform: "capitalize",
   fontSize: 13,
   fontWeight: 700,
 };

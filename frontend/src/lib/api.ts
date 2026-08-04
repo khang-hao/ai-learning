@@ -47,8 +47,32 @@ export async function generateSummary(topic: string): Promise<StudyResponse> {
   });
 }
 
+export async function explainSimply(topic: string): Promise<StudyResponse> {
+  return request<StudyResponse>("/api/study/explain-simple", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic }),
+  });
+}
+
 export async function generateQuiz(topic: string): Promise<StudyResponse> {
   return request<StudyResponse>("/api/study/quiz", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic }),
+  });
+}
+
+export async function compareTopics(topicA: string, topicB: string): Promise<StudyResponse> {
+  return request<StudyResponse>("/api/study/compare", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic_a: topicA, topic_b: topicB }),
+  });
+}
+
+export async function generateChecklist(topic: string): Promise<StudyResponse> {
+  return request<StudyResponse>("/api/study/checklist", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ topic }),

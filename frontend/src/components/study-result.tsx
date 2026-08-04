@@ -10,7 +10,8 @@ type Block =
   | { type: "heading"; level: 1 | 2 | 3; text: string }
   | { type: "section"; text: string }
   | { type: "paragraph"; text: string }
-  | { type: "list"; items: string[] };
+  | { type: "list"; items: string[] }
+  | { type: "table"; headers: string[]; rows: string[][] };
 
 export function StudyResult({ text }: StudyResultProps) {
   const blocks = parseBlocks(text);
@@ -64,6 +65,31 @@ export function StudyResult({ text }: StudyResultProps) {
           );
         }
 
+        if (block.type === "table") {
+          return (
+            <div key={index} className="study-output__table-shell">
+              <table className="study-output__table">
+                <thead>
+                  <tr>
+                    {block.headers.map((header, headerIndex) => (
+                      <th key={headerIndex}>{renderInline(header)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex}>{renderInline(cell)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+
         return (
           <p key={index} className="study-output__paragraph">
             {renderInline(block.text)}
@@ -83,6 +109,7 @@ function parseBlocks(text: string): Block[] {
   const blocks: Block[] = [];
   let paragraphBuffer: string[] = [];
   let listBuffer: string[] = [];
+  let tableBuffer: string[] = [];
 
   const flushParagraph = () => {
     if (paragraphBuffer.length > 0) {
@@ -104,12 +131,37 @@ function parseBlocks(text: string): Block[] {
     }
   };
 
+  const flushTable = () => {
+    if (tableBuffer.length > 0) {
+      const table = parseTable(tableBuffer);
+      if (table) {
+        blocks.push(table);
+      } else {
+        blocks.push({
+          type: "paragraph",
+          text: tableBuffer.join(" "),
+        });
+      }
+      tableBuffer = [];
+    }
+  };
+
   for (const line of lines) {
     if (!line) {
       flushParagraph();
       flushList();
+      flushTable();
       continue;
     }
+
+    if (isTableLine(line)) {
+      flushParagraph();
+      flushList();
+      tableBuffer.push(line);
+      continue;
+    }
+
+    flushTable();
 
     const headingMatch = line.match(/^(#{1,3})\s+(.*)$/);
     if (headingMatch) {
@@ -147,13 +199,14 @@ function parseBlocks(text: string): Block[] {
 
   flushParagraph();
   flushList();
+  flushTable();
 
   return blocks;
 }
 
 function renderInline(text: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*|\[\d+\])/g;
+  const pattern = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[\d+\])/g;
   let lastIndex = 0;
   let key = 0;
 
@@ -165,7 +218,9 @@ function renderInline(text: string): ReactNode[] {
       nodes.push(text.slice(lastIndex, index));
     }
 
-    if (token.startsWith("**") && token.endsWith("**")) {
+    if (token.startsWith("`") && token.endsWith("`")) {
+      nodes.push(<code key={key++} className="study-output__inline-code">{token.slice(1, -1)}</code>);
+    } else if (token.startsWith("**") && token.endsWith("**")) {
       nodes.push(<strong key={key++}>{token.slice(2, -2)}</strong>);
     } else if (token.startsWith("*") && token.endsWith("*")) {
       nodes.push(<em key={key++}>{token.slice(1, -1)}</em>);
@@ -185,4 +240,55 @@ function renderInline(text: string): ReactNode[] {
   }
 
   return nodes;
+}
+
+function isTableLine(line: string): boolean {
+  return line.includes("|") && !line.startsWith("### ");
+}
+
+function parseTable(lines: string[]): Block | null {
+  if (lines.length < 2) {
+    return null;
+  }
+
+  const normalized = lines
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && line.endsWith("|"));
+
+  if (normalized.length < 2) {
+    return null;
+  }
+
+  const headers = splitTableRow(normalized[0]);
+  const separator = splitTableRow(normalized[1]);
+
+  if (
+    headers.length === 0 ||
+    headers.length !== separator.length ||
+    !separator.every((cell) => /^:?-{3,}:?$/.test(cell))
+  ) {
+    return null;
+  }
+
+  const rows = normalized
+    .slice(2)
+    .map(splitTableRow)
+    .filter((row) => row.length === headers.length);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return {
+    type: "table",
+    headers,
+    rows,
+  };
+}
+
+function splitTableRow(line: string): string[] {
+  return line
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
 }

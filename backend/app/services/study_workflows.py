@@ -1,5 +1,14 @@
 from app.rag.retrieval import retrieve_context
-from app.schemas.study import AskRequest, Citation, QuizRequest, StudyResponse, SummaryRequest
+from app.schemas.study import (
+    AskRequest,
+    ChecklistRequest,
+    Citation,
+    CompareRequest,
+    ExplainSimpleRequest,
+    QuizRequest,
+    StudyResponse,
+    SummaryRequest,
+)
 from app.services.llm import generate_grounded_response
 
 SYSTEM_PROMPT = (
@@ -23,7 +32,7 @@ def run_ask_workflow(payload: AskRequest) -> StudyResponse:
 
 
 def run_summary_workflow(payload: SummaryRequest) -> StudyResponse:
-    context = retrieve_context(f"Summarize material about {payload.topic}", top_k=payload.top_k)
+    context = retrieve_context(payload.topic, top_k=payload.top_k)
     answer = generate_grounded_response(
         system_prompt=SYSTEM_PROMPT,
         user_prompt=_build_prompt(
@@ -37,14 +46,67 @@ def run_summary_workflow(payload: SummaryRequest) -> StudyResponse:
     return StudyResponse(answer=answer, citations=_build_citations(context))
 
 
+def run_explain_simple_workflow(payload: ExplainSimpleRequest) -> StudyResponse:
+    context = retrieve_context(payload.topic, top_k=payload.top_k)
+    answer = generate_grounded_response(
+        system_prompt=SYSTEM_PROMPT,
+        user_prompt=_build_prompt(
+            task=(
+                f"Explain {payload.topic} in very simple study language. "
+                "Use short sections, simple analogies when helpful, and end with a quick recap."
+            ),
+            context=context,
+        ),
+    )
+    return StudyResponse(answer=answer, citations=_build_citations(context))
+
+
 def run_quiz_workflow(payload: QuizRequest) -> StudyResponse:
-    context = retrieve_context(f"Create a quiz about {payload.topic}", top_k=payload.top_k)
+    context = retrieve_context(payload.topic, top_k=payload.top_k)
     answer = generate_grounded_response(
         system_prompt=SYSTEM_PROMPT,
         user_prompt=_build_prompt(
             task=(
                 f"Create {payload.question_count} short-answer study questions about {payload.topic}. "
                 "After each question, provide a concise answer key."
+            ),
+            context=context,
+        ),
+    )
+    return StudyResponse(answer=answer, citations=_build_citations(context))
+
+
+def run_compare_workflow(payload: CompareRequest) -> StudyResponse:
+    combined_topic = f"{payload.topic_a} and {payload.topic_b}"
+    context = retrieve_context(combined_topic, top_k=payload.top_k)
+    answer = generate_grounded_response(
+        system_prompt=SYSTEM_PROMPT,
+        user_prompt=_build_prompt(
+            task=(
+                f"Compare {payload.topic_a} and {payload.topic_b}. "
+                "Write clean study notes using markdown headings. "
+                "For the differences section, output a proper markdown table with exactly these columns: "
+                "`Property | {topic_a} | {topic_b}`. "
+                "Keep table cells short and readable, avoid broken separator lines, "
+                "then add a short section on when each concept is used and common exam confusion points."
+            ).format(
+                topic_a=payload.topic_a,
+                topic_b=payload.topic_b,
+            ),
+            context=context,
+        ),
+    )
+    return StudyResponse(answer=answer, citations=_build_citations(context))
+
+
+def run_checklist_workflow(payload: ChecklistRequest) -> StudyResponse:
+    context = retrieve_context(payload.topic, top_k=payload.top_k)
+    answer = generate_grounded_response(
+        system_prompt=SYSTEM_PROMPT,
+        user_prompt=_build_prompt(
+            task=(
+                f"Create a revision checklist for {payload.topic}. "
+                "Group it into must-know ideas, definitions, problem-solving skills, and quick self-test prompts."
             ),
             context=context,
         ),
