@@ -1,3 +1,4 @@
+from app.agents.router import route_study_request
 from app.rag.retrieval import retrieve_context
 from app.schemas.study import (
     AskRequest,
@@ -6,6 +7,7 @@ from app.schemas.study import (
     CompareRequest,
     ExplainSimpleRequest,
     QuizRequest,
+    RoutedStudyRequest,
     StudyResponse,
     SummaryRequest,
 )
@@ -28,7 +30,7 @@ def run_ask_workflow(payload: AskRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="ask")
 
 
 def run_summary_workflow(payload: SummaryRequest) -> StudyResponse:
@@ -43,7 +45,7 @@ def run_summary_workflow(payload: SummaryRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="summarize")
 
 
 def run_explain_simple_workflow(payload: ExplainSimpleRequest) -> StudyResponse:
@@ -58,7 +60,7 @@ def run_explain_simple_workflow(payload: ExplainSimpleRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="explain")
 
 
 def run_quiz_workflow(payload: QuizRequest) -> StudyResponse:
@@ -73,7 +75,7 @@ def run_quiz_workflow(payload: QuizRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="quiz")
 
 
 def run_compare_workflow(payload: CompareRequest) -> StudyResponse:
@@ -96,7 +98,7 @@ def run_compare_workflow(payload: CompareRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="compare")
 
 
 def run_checklist_workflow(payload: ChecklistRequest) -> StudyResponse:
@@ -111,7 +113,48 @@ def run_checklist_workflow(payload: ChecklistRequest) -> StudyResponse:
             context=context,
         ),
     )
-    return StudyResponse(answer=answer, citations=_build_citations(context))
+    return _build_response(answer=answer, context=context, workflow="checklist")
+
+
+def run_routed_workflow(payload: RoutedStudyRequest) -> StudyResponse:
+    decision = route_study_request(payload.user_input)
+
+    if decision.action == "ask":
+        response = run_ask_workflow(
+            AskRequest(question=decision.primary_text, top_k=payload.top_k)
+        )
+    elif decision.action == "summarize":
+        response = run_summary_workflow(
+            SummaryRequest(topic=decision.primary_text, top_k=payload.top_k)
+        )
+    elif decision.action == "explain":
+        response = run_explain_simple_workflow(
+            ExplainSimpleRequest(topic=decision.primary_text, top_k=payload.top_k)
+        )
+    elif decision.action == "quiz":
+        response = run_quiz_workflow(
+            QuizRequest(
+                topic=decision.primary_text,
+                top_k=payload.top_k,
+                question_count=payload.quiz_question_count,
+            )
+        )
+    elif decision.action == "compare":
+        response = run_compare_workflow(
+            CompareRequest(
+                topic_a=decision.primary_text,
+                topic_b=decision.secondary_text or "",
+                top_k=max(payload.top_k, 8),
+            )
+        )
+    else:
+        response = run_checklist_workflow(
+            ChecklistRequest(topic=decision.primary_text, top_k=payload.top_k)
+        )
+
+    response.workflow = decision.action
+    response.routing_reason = decision.reason
+    return response
 
 
 def _build_prompt(task: str, context: list[dict[str, str | int | None]]) -> str:
@@ -136,3 +179,15 @@ def _build_citations(context: list[dict[str, str | int | None]]) -> list[Citatio
         )
         for chunk in context
     ]
+
+
+def _build_response(
+    answer: str,
+    context: list[dict[str, str | int | None]],
+    workflow: str,
+) -> StudyResponse:
+    return StudyResponse(
+        answer=answer,
+        citations=_build_citations(context),
+        workflow=workflow,
+    )

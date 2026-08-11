@@ -5,6 +5,7 @@ from app.schemas.study import (
     ChecklistRequest,
     CompareRequest,
     ExplainSimpleRequest,
+    RoutedStudyRequest,
     StudyResponse,
     SummaryRequest,
     QuizRequest,
@@ -15,6 +16,7 @@ from app.services.study_workflows import (
     run_compare_workflow,
     run_explain_simple_workflow,
     run_quiz_workflow,
+    run_routed_workflow,
     run_summary_workflow,
 )
 
@@ -25,6 +27,14 @@ router = APIRouter()
 def ask_question(payload: AskRequest) -> StudyResponse:
     try:
         return run_ask_workflow(payload)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post("/route", response_model=StudyResponse)
+def route_study_request(payload: RoutedStudyRequest) -> StudyResponse:
+    try:
+        return run_routed_workflow(payload)
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 

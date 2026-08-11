@@ -10,6 +10,7 @@ import {
   generateChecklist,
   generateQuiz,
   generateSummary,
+  routeStudyRequest,
 } from "@/lib/api";
 import { StudyResult } from "@/components/study-result";
 import type { Citation, StoredDocument } from "@/types/api";
@@ -18,14 +19,16 @@ type StudyPanelProps = {
   documents: StoredDocument[];
 };
 
-type Mode = "ask" | "summarize" | "explain" | "quiz" | "compare" | "checklist";
+type Mode = "auto" | "ask" | "summarize" | "explain" | "quiz" | "compare" | "checklist";
 
 export function StudyPanel({ documents }: StudyPanelProps) {
-  const [mode, setMode] = useState<Mode>("ask");
+  const [mode, setMode] = useState<Mode>("auto");
   const [prompt, setPrompt] = useState("");
   const [secondaryPrompt, setSecondaryPrompt] = useState("");
   const [result, setResult] = useState("");
   const [citations, setCitations] = useState<Citation[]>([]);
+  const [resolvedWorkflow, setResolvedWorkflow] = useState<string | null>(null);
+  const [routingReason, setRoutingReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const handleRun = async () => {
@@ -42,7 +45,9 @@ export function StudyPanel({ documents }: StudyPanelProps) {
     try {
       setBusy(true);
       const response =
-        mode === "ask"
+        mode === "auto"
+          ? await routeStudyRequest(prompt)
+          : mode === "ask"
           ? await askQuestion(prompt)
           : mode === "summarize"
             ? await generateSummary(prompt)
@@ -56,9 +61,13 @@ export function StudyPanel({ documents }: StudyPanelProps) {
 
       setResult(response.answer);
       setCitations(response.citations);
+      setResolvedWorkflow(response.workflow ?? null);
+      setRoutingReason(response.routing_reason ?? null);
     } catch (error) {
       setResult(error instanceof Error ? error.message : "Request failed.");
       setCitations([]);
+      setResolvedWorkflow(null);
+      setRoutingReason(null);
     } finally {
       setBusy(false);
     }
@@ -77,6 +86,7 @@ export function StudyPanel({ documents }: StudyPanelProps) {
         onChange={(event) => setMode(event.target.value as Mode)}
         style={inputStyle}
       >
+        <option value="auto">Auto route request</option>
         <option value="ask">Ask a question</option>
         <option value="summarize">Generate a summary</option>
         <option value="explain">Explain simply</option>
@@ -90,7 +100,9 @@ export function StudyPanel({ documents }: StudyPanelProps) {
         value={prompt}
         onChange={(event) => setPrompt(event.target.value)}
         placeholder={
-          mode === "ask"
+          mode === "auto"
+            ? "Compare stacks and queues"
+            : mode === "ask"
             ? "What is backpropagation and why does it work?"
             : mode === "summarize"
               ? "Neural network optimization"
@@ -130,8 +142,11 @@ export function StudyPanel({ documents }: StudyPanelProps) {
             <p style={eyebrowStyle}>Study Output</p>
             <h3 style={{ margin: "4px 0 0 0" }}>Result</h3>
           </div>
-          <span style={modeBadgeStyle}>{getModeLabel(mode)}</span>
+          <span style={modeBadgeStyle}>
+            {resolvedWorkflow ? `Used: ${getModeLabel(resolvedWorkflow as Mode)}` : getModeLabel(mode)}
+          </span>
         </div>
+        {routingReason ? <p style={routingReasonStyle}>{routingReason}</p> : null}
         <div style={resultBoxStyle}>
           <StudyResult text={result} />
         </div>
@@ -168,6 +183,8 @@ export function StudyPanel({ documents }: StudyPanelProps) {
 
 function getModeLabel(mode: Mode): string {
   switch (mode) {
+    case "auto":
+      return "Auto Route";
     case "ask":
       return "Q&A";
     case "summarize":
@@ -251,6 +268,13 @@ const modeBadgeStyle: CSSProperties = {
   color: "var(--accent)",
   fontSize: 13,
   fontWeight: 700,
+};
+
+const routingReasonStyle: CSSProperties = {
+  margin: 0,
+  color: "var(--muted)",
+  lineHeight: 1.6,
+  fontSize: 14,
 };
 
 const resultBoxStyle: CSSProperties = {

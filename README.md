@@ -18,6 +18,7 @@ The project now has:
 
 - **Phase 1**: upload, indexing, retrieval, grounded Q&A with citations
 - **Phase 2**: summary, explain simply, quiz, compare topics, revision checklist
+- **Phase 3**: lightweight task routing that chooses the right study workflow from one free-form request
 
 Phase 1 is considered truly complete only when you can:
 
@@ -55,6 +56,25 @@ Phase 2 reuses the same retrieval pipeline for more study workflows.
 
 The important idea is that Phase 2 does **not** build a new AI system. It reuses the
 same RAG foundation from Phase 1 and changes the task prompt.
+
+## What Phase 3 Adds
+
+Phase 3 adds a simple routing layer.
+
+- user writes one free-form request
+- backend chooses the most suitable workflow
+- backend runs the selected Phase 2 study tool
+- UI shows which workflow was used and why
+
+Examples:
+
+- `Compare stack and queue`
+- `Explain dynamic programming simply`
+- `Give me a revision checklist for binary trees`
+- `Create a quiz on gradient descent`
+
+This is intentionally **not** a full agent framework. It is a small routing step that
+teaches workflow selection before adding LangGraph or more complex orchestration.
 
 ## Phase 1 Tech Stack
 
@@ -455,14 +475,23 @@ Phase 2 is working well when:
 4. comparisons discuss both requested topics clearly
 5. checklists are actionable for revision
 
-## What Comes After Phase 2
+## How To Know Phase 3 Is Really Done
+
+Phase 3 is working when:
+
+1. the auto-route mode chooses the correct workflow most of the time
+2. compare-style requests are routed to compare
+3. summary-style requests are routed to summarize
+4. the UI clearly shows which workflow was selected
+5. the fallback for unclear requests still works as grounded Q&A
+
+## What Comes After Phase 3
 
 After this, the next steps are:
 
-1. improve retrieval quality and prompt quality
-2. add simple task routing
-3. add one multimodal feature
-4. add one PyTorch-trained component
+1. improve routing quality and prompt quality
+2. add one multimodal feature
+3. add one PyTorch-trained component
 
 ## Official References
 

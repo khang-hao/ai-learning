@@ -39,6 +39,14 @@ export async function askQuestion(question: string): Promise<StudyResponse> {
   });
 }
 
+export async function routeStudyRequest(userInput: string): Promise<StudyResponse> {
+  return request<StudyResponse>("/api/study/route", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_input: userInput }),
+  });
+}
+
 export async function generateSummary(topic: string): Promise<StudyResponse> {
   return request<StudyResponse>("/api/study/summarize", {
     method: "POST",

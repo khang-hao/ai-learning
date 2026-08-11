@@ -33,6 +33,12 @@ class ChecklistRequest(BaseModel):
     top_k: int = Field(default=6, ge=1, le=10)
 
 
+class RoutedStudyRequest(BaseModel):
+    user_input: str = Field(min_length=3)
+    top_k: int = Field(default=6, ge=1, le=12)
+    quiz_question_count: int = Field(default=5, ge=3, le=10)
+
+
 class Citation(BaseModel):
     filename: str
     page_number: int | None = None
@@ -43,3 +49,5 @@ class Citation(BaseModel):
 class StudyResponse(BaseModel):
     answer: str
     citations: list[Citation]
+    workflow: str | None = None
+    routing_reason: str | None = None

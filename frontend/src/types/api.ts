@@ -26,4 +26,6 @@ export type Citation = {
 export type StudyResponse = {
   answer: string;
   citations: Citation[];
+  workflow?: string | null;
+  routing_reason?: string | null;
 };
