@@ -11,7 +11,7 @@ type UploadFormProps = {
 
 export function UploadForm({ onUploaded }: UploadFormProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("Upload a PDF, TXT, or MD file.");
+  const [status, setStatus] = useState("Upload a PDF, TXT, MD, or image note.");
   const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -43,11 +43,12 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     >
       <h2 style={headingStyle}>1. Upload Material</h2>
       <p style={copyStyle}>
-        Keep v1 narrow. If your slides are in PowerPoint, export them to PDF first.
+        Phase 4 adds image OCR. You can now upload screenshots of notes or slide images,
+        and the backend will extract text before indexing.
       </p>
       <input
         type="file"
-        accept=".pdf,.txt,.md"
+        accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp,.bmp"
         onChange={(event) => setFile(event.target.files?.[0] ?? null)}
       />
       <button

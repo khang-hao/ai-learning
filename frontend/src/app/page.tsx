@@ -49,9 +49,8 @@ export default function HomePage() {
         </p>
         <h1 style={{ marginBottom: 8 }}>Coursework Copilot</h1>
         <p style={{ marginTop: 0, maxWidth: 760, lineHeight: 1.6 }}>
-          Start with a clean retrieval pipeline. Upload course material, ask grounded
-          questions, and generate study outputs like summaries, quizzes, comparisons,
-          and revision checklists from your own notes.
+          Start with a clean retrieval pipeline. Upload course material, screenshots of
+          notes, or slide images, then generate grounded study outputs from your own data.
         </p>
       </section>
 

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     chunk_size: int = Field(default=220)
     chunk_overlap: int = Field(default=40)
     top_k: int = Field(default=4)
+    ocr_min_score: float = Field(default=0.45)
 
     @property
     def project_root(self) -> Path:

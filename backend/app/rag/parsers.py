@@ -3,6 +3,7 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+from app.rag.ocr import extract_text_from_image_bytes
 from app.rag.types import PageText
 
 
@@ -14,8 +15,11 @@ def parse_document_bytes(filename: str, content: bytes) -> list[PageText]:
     if suffix in {".txt", ".md"}:
         text = content.decode("utf-8", errors="ignore")
         return [PageText(text=text, page_number=1)]
+    if suffix in {".png", ".jpg", ".jpeg", ".webp", ".bmp"}:
+        text = extract_text_from_image_bytes(content)
+        return [PageText(text=text, page_number=1)]
 
-    raise ValueError("Unsupported file type. Use pdf, txt, or md for v1.")
+    raise ValueError("Unsupported file type. Use pdf, txt, md, png, jpg, jpeg, webp, or bmp.")
 
 
 def _parse_pdf(content: bytes) -> list[PageText]:

@@ -19,6 +19,7 @@ The project now has:
 - **Phase 1**: upload, indexing, retrieval, grounded Q&A with citations
 - **Phase 2**: summary, explain simply, quiz, compare topics, revision checklist
 - **Phase 3**: lightweight task routing that chooses the right study workflow from one free-form request
+- **Phase 4**: image-based note and slide ingestion through OCR
 
 Phase 1 is considered truly complete only when you can:
 
@@ -75,6 +76,18 @@ Examples:
 
 This is intentionally **not** a full agent framework. It is a small routing step that
 teaches workflow selection before adding LangGraph or more complex orchestration.
+
+## What Phase 4 Adds
+
+Phase 4 adds one multimodal feature without changing the core RAG design:
+
+- upload `.png`, `.jpg`, `.jpeg`, `.webp`, or `.bmp`
+- run OCR locally to extract text from note screenshots or slide images
+- feed that extracted text into the same chunking, embedding, retrieval, and study workflows
+
+This is a good first multimodal step because it extends the current architecture instead
+of replacing it. The system still works as text RAG internally, but it can now accept
+images as an input source.
 
 ## Phase 1 Tech Stack
 
@@ -222,6 +235,7 @@ This installs:
 - Chroma
 - PDF parsing libraries
 - HTTP client dependencies for talking to Ollama
+- OCR dependencies for image text extraction
 
 ## Step 7: Install Frontend Dependencies
 
@@ -327,7 +341,7 @@ The frontend should be at:
 ## Step 13: Test the Full App
 
 1. open [http://localhost:3000](http://localhost:3000)
-2. upload a small `pdf`, `txt`, or `md` file
+2. upload a small `pdf`, `txt`, `md`, or text-heavy image file
 3. wait for indexing to finish
 4. ask a question about the uploaded material
 5. check the answer and citations
@@ -349,6 +363,15 @@ Do not start with a giant textbook.
 5. the backend sends the chunk text to Ollama `/api/embed`
 6. Ollama returns vector embeddings
 7. the backend stores vectors and metadata in Chroma
+
+For images specifically:
+
+1. the backend loads the image
+2. it normalizes orientation and color
+3. it runs OCR locally
+4. it filters out very low-confidence OCR lines
+5. it joins the remaining lines into text
+6. that text then enters the normal RAG pipeline
 
 ### When you ask a question
 
@@ -485,12 +508,22 @@ Phase 3 is working when:
 4. the UI clearly shows which workflow was selected
 5. the fallback for unclear requests still works as grounded Q&A
 
-## What Comes After Phase 3
+## How To Know Phase 4 Is Really Done
+
+Phase 4 is working when:
+
+1. you can upload an image note or slide screenshot without crashing
+2. OCR extracts enough readable text to index
+3. questions about that image-derived content return relevant answers
+4. citations still point to grounded retrieved chunks
+5. the image path reuses the same study workflows as PDFs and notes
+
+## What Comes After Phase 4
 
 After this, the next steps are:
 
-1. improve routing quality and prompt quality
-2. add one multimodal feature
+1. improve OCR quality, routing quality, and prompt quality
+2. optionally add direct vision question answering later
 3. add one PyTorch-trained component
 
 ## Official References
