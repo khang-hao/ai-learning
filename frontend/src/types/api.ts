@@ -28,4 +28,6 @@ export type StudyResponse = {
   citations: Citation[];
   workflow?: string | null;
   routing_reason?: string | null;
+  routing_method?: string | null;
+  routing_confidence?: number | null;
 };

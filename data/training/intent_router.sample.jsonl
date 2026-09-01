@@ -1,0 +1,36 @@
+{"text":"What is backpropagation and why does it work?","label":"ask"}
+{"text":"Explain the difference between supervised and unsupervised learning","label":"ask"}
+{"text":"How does binary search run in logarithmic time?","label":"ask"}
+{"text":"Why do we use normalization in machine learning?","label":"ask"}
+{"text":"What does encapsulation mean in object oriented programming?","label":"ask"}
+{"text":"How do stacks work internally?","label":"ask"}
+{"text":"Summarize gradient descent","label":"summarize"}
+{"text":"Give me a summary of linked lists","label":"summarize"}
+{"text":"Summarise the topic of recursion","label":"summarize"}
+{"text":"Write a study summary about binary search trees","label":"summarize"}
+{"text":"Create a summary of neural network optimization","label":"summarize"}
+{"text":"I need a summary on data abstraction","label":"summarize"}
+{"text":"Explain dynamic programming simply","label":"explain"}
+{"text":"Explain heaps in simple terms","label":"explain"}
+{"text":"Give me a simple explanation of overfitting","label":"explain"}
+{"text":"Explain like I am a beginner what a queue is","label":"explain"}
+{"text":"Explain recursion in simple language","label":"explain"}
+{"text":"Make pointers easy to understand","label":"explain"}
+{"text":"Create a quiz on gradient descent","label":"quiz"}
+{"text":"Quiz me on stacks and queues","label":"quiz"}
+{"text":"Give me practice questions on binary trees","label":"quiz"}
+{"text":"Test me on the basics of backpropagation","label":"quiz"}
+{"text":"Generate a short-answer quiz about linked lists","label":"quiz"}
+{"text":"Make some revision questions for dynamic programming","label":"quiz"}
+{"text":"Compare stack and queue","label":"compare"}
+{"text":"Stacks vs queues","label":"compare"}
+{"text":"Difference between DFS and BFS","label":"compare"}
+{"text":"Compare arrays and linked lists","label":"compare"}
+{"text":"Binary tree versus binary search tree","label":"compare"}
+{"text":"Compare supervised learning and unsupervised learning","label":"compare"}
+{"text":"Create a revision checklist for binary search","label":"checklist"}
+{"text":"Checklist for gradient descent","label":"checklist"}
+{"text":"Give me a study checklist for linked lists","label":"checklist"}
+{"text":"Make a revision checklist on recursion","label":"checklist"}
+{"text":"I want a review checklist for backpropagation","label":"checklist"}
+{"text":"Prepare a checklist for exam revision on queues","label":"checklist"}

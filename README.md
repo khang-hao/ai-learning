@@ -20,6 +20,7 @@ The project now has:
 - **Phase 2**: summary, explain simply, quiz, compare topics, revision checklist
 - **Phase 3**: lightweight task routing that chooses the right study workflow from one free-form request
 - **Phase 4**: image-based note and slide ingestion through OCR
+- **Phase 5**: a trainable PyTorch + Hugging Face intent classifier that upgrades the Phase 3 router
 
 Phase 1 is considered truly complete only when you can:
 
@@ -88,6 +89,19 @@ Phase 4 adds one multimodal feature without changing the core RAG design:
 This is a good first multimodal step because it extends the current architecture instead
 of replacing it. The system still works as text RAG internally, but it can now accept
 images as an input source.
+
+## What Phase 5 Adds
+
+Phase 5 adds a small trained ML component to the real app flow.
+
+- the app keeps the old heuristic router as a fallback
+- a new Hugging Face + PyTorch classifier can be trained on intent-labeled requests
+- when the trained model exists, the auto-route path uses it first
+- the UI shows whether routing came from the ML classifier or the heuristic fallback
+
+This phase was implemented as an **intent classifier** because it is the smallest useful
+trained component that improves an existing production path in the app. It also lets you
+learn PyTorch and Hugging Face without needing a large labeled dataset from users.
 
 ## Phase 1 Tech Stack
 
@@ -236,6 +250,7 @@ This installs:
 - PDF parsing libraries
 - HTTP client dependencies for talking to Ollama
 - OCR dependencies for image text extraction
+- PyTorch and Hugging Face Transformers for the Phase 5 classifier
 
 ## Step 7: Install Frontend Dependencies
 
@@ -345,6 +360,26 @@ The frontend should be at:
 3. wait for indexing to finish
 4. ask a question about the uploaded material
 5. check the answer and citations
+
+## Train The Phase 5 Intent Classifier
+
+Phase 5 introduces a trainable model, but the app still works without it because the
+router falls back to heuristics.
+
+To train the classifier:
+
+```powershell
+.venv\Scripts\python.exe scripts\train_intent_router.py
+```
+
+This uses:
+
+- sample dataset: `data/training/intent_router.sample.jsonl`
+- default base model: `bert-base-uncased`
+- default tokenizer: `bert-base-uncased`
+- output directory: `data/processed/ml/intent_router`
+
+After training, the auto-route mode will start using the trained classifier automatically.
 
 ### Good first test file
 
@@ -518,13 +553,23 @@ Phase 4 is working when:
 4. citations still point to grounded retrieved chunks
 5. the image path reuses the same study workflows as PDFs and notes
 
+## How To Know Phase 5 Is Really Done
+
+Phase 5 is working when:
+
+1. the training script saves a model into `data/processed/ml/intent_router`
+2. auto-route requests show `ML intent classifier` in the UI
+3. the classifier picks the correct workflow for common requests
+4. if the model is missing or uncertain, the app still falls back safely
+5. the router behavior is now partly learned rather than fully hard-coded
+
 ## What Comes After Phase 4
 
 After this, the next steps are:
 
 1. improve OCR quality, routing quality, and prompt quality
 2. optionally add direct vision question answering later
-3. add one PyTorch-trained component
+3. add a second ML component closer to retrieval quality, such as a reranker
 
 ## Official References
 

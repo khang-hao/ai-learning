@@ -51,3 +51,5 @@ class StudyResponse(BaseModel):
     citations: list[Citation]
     workflow: str | None = None
     routing_reason: str | None = None
+    routing_method: str | None = None
+    routing_confidence: float | None = None

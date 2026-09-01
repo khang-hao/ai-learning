@@ -38,8 +38,14 @@ select {
   font: inherit;
 }
 
+.workspace-grid > * {
+  min-width: 0;
+}
+
 .study-output {
+  min-width: 0;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .study-output__empty {
@@ -119,6 +125,7 @@ select {
 }
 
 .study-output__table-shell {
+  max-width: 100%;
   margin: 0 0 22px 0;
   overflow-x: auto;
   border-radius: 16px;
@@ -155,4 +162,14 @@ select {
 
 .study-output__table tbody tr:last-child td {
   border-bottom: none;
+}
+
+@media (max-width: 760px) {
+  body {
+    padding: 14px;
+  }
+
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }

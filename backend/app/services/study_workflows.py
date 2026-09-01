@@ -154,6 +154,8 @@ def run_routed_workflow(payload: RoutedStudyRequest) -> StudyResponse:
 
     response.workflow = decision.action
     response.routing_reason = decision.reason
+    response.routing_method = decision.method
+    response.routing_confidence = decision.confidence
     return response
 
 

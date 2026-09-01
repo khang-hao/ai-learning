@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     chunk_overlap: int = Field(default=40)
     top_k: int = Field(default=4)
     ocr_min_score: float = Field(default=0.45)
+    intent_router_min_confidence: float = Field(default=0.60)
 
     @property
     def project_root(self) -> Path:
@@ -35,10 +36,15 @@ class Settings(BaseSettings):
     def chroma_dir(self) -> Path:
         return self.project_root / "data" / "processed" / "chroma"
 
+    @property
+    def intent_router_dir(self) -> Path:
+        return self.project_root / "data" / "processed" / "ml" / "intent_router"
+
 
 @lru_cache
 def get_settings() -> Settings:
     settings = Settings()
     settings.raw_data_dir.mkdir(parents=True, exist_ok=True)
     settings.chroma_dir.mkdir(parents=True, exist_ok=True)
+    settings.intent_router_dir.mkdir(parents=True, exist_ok=True)
     return settings

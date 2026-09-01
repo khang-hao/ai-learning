@@ -29,6 +29,8 @@ export function StudyPanel({ documents }: StudyPanelProps) {
   const [citations, setCitations] = useState<Citation[]>([]);
   const [resolvedWorkflow, setResolvedWorkflow] = useState<string | null>(null);
   const [routingReason, setRoutingReason] = useState<string | null>(null);
+  const [routingMethod, setRoutingMethod] = useState<string | null>(null);
+  const [routingConfidence, setRoutingConfidence] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
   const handleRun = async () => {
@@ -63,11 +65,15 @@ export function StudyPanel({ documents }: StudyPanelProps) {
       setCitations(response.citations);
       setResolvedWorkflow(response.workflow ?? null);
       setRoutingReason(response.routing_reason ?? null);
+      setRoutingMethod(response.routing_method ?? null);
+      setRoutingConfidence(response.routing_confidence ?? null);
     } catch (error) {
       setResult(error instanceof Error ? error.message : "Request failed.");
       setCitations([]);
       setResolvedWorkflow(null);
       setRoutingReason(null);
+      setRoutingMethod(null);
+      setRoutingConfidence(null);
     } finally {
       setBusy(false);
     }
@@ -147,6 +153,12 @@ export function StudyPanel({ documents }: StudyPanelProps) {
           </span>
         </div>
         {routingReason ? <p style={routingReasonStyle}>{routingReason}</p> : null}
+        {routingMethod ? (
+          <p style={routingMetaStyle}>
+            Route engine: <strong>{formatRoutingMethod(routingMethod)}</strong>
+            {routingConfidence !== null ? ` (${routingConfidence.toFixed(2)})` : ""}
+          </p>
+        ) : null}
         <div style={resultBoxStyle}>
           <StudyResult text={result} />
         </div>
@@ -181,6 +193,10 @@ export function StudyPanel({ documents }: StudyPanelProps) {
   );
 }
 
+function formatRoutingMethod(method: string): string {
+  return method === "ml_intent_classifier" ? "ML intent classifier" : "Heuristic fallback";
+}
+
 function getModeLabel(mode: Mode): string {
   switch (mode) {
     case "auto":
@@ -203,6 +219,7 @@ function getModeLabel(mode: Mode): string {
 const panelStyle: CSSProperties = {
   display: "grid",
   gap: 14,
+  minWidth: 0,
   padding: 20,
   border: "1px solid var(--border)",
   borderRadius: 20,
@@ -235,11 +252,13 @@ const buttonStyle: CSSProperties = {
 const resultShellStyle: CSSProperties = {
   display: "grid",
   gap: 12,
+  minWidth: 0,
 };
 
 const citationShellStyle: CSSProperties = {
   display: "grid",
   gap: 12,
+  minWidth: 0,
   padding: 16,
   borderRadius: 18,
   background: "linear-gradient(180deg, rgba(216, 235, 232, 0.92), rgba(255, 253, 247, 0.95))",
@@ -251,6 +270,8 @@ const resultHeaderStyle: CSSProperties = {
   justifyContent: "space-between",
   alignItems: "flex-start",
   gap: 12,
+  minWidth: 0,
+  flexWrap: "wrap",
 };
 
 const eyebrowStyle: CSSProperties = {
@@ -277,7 +298,18 @@ const routingReasonStyle: CSSProperties = {
   fontSize: 14,
 };
 
+const routingMetaStyle: CSSProperties = {
+  margin: 0,
+  color: "var(--accent)",
+  lineHeight: 1.5,
+  fontSize: 13,
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+};
+
 const resultBoxStyle: CSSProperties = {
+  minWidth: 0,
+  overflow: "hidden",
   padding: 20,
   borderRadius: 18,
   background: "linear-gradient(180deg, #eef7f6 0%, #f9fbf7 100%)",
@@ -294,6 +326,7 @@ const citationListStyle: CSSProperties = {
 };
 
 const citationCardStyle: CSSProperties = {
+  minWidth: 0,
   padding: 14,
   borderRadius: 14,
   background: "rgba(255, 255, 255, 0.78)",
@@ -305,6 +338,7 @@ const citationMetaRowStyle: CSSProperties = {
   justifyContent: "space-between",
   gap: 12,
   alignItems: "center",
+  flexWrap: "wrap",
   marginBottom: 8,
 };
 

@@ -13,9 +13,11 @@ frontend/.env.local
 backend/storage/
 data/raw/*
 data/processed/chroma/
+data/processed/ml/intent_router/*
 
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/ml/.gitkeep
 
 frontend/.next/
 frontend/node_modules/
