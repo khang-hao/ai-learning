@@ -21,6 +21,7 @@ The project now has:
 - **Phase 3**: lightweight task routing that chooses the right study workflow from one free-form request
 - **Phase 4**: image-based note and slide ingestion through OCR
 - **Phase 5**: a trainable PyTorch + Hugging Face intent classifier that upgrades the Phase 3 router
+- **Phase 6**: retrieval evaluation with measurable `Hit@K` and `MRR` metrics
 
 Phase 1 is considered truly complete only when you can:
 
@@ -102,6 +103,23 @@ Phase 5 adds a small trained ML component to the real app flow.
 This phase was implemented as an **intent classifier** because it is the smallest useful
 trained component that improves an existing production path in the app. It also lets you
 learn PyTorch and Hugging Face without needing a large labeled dataset from users.
+
+## What Phase 6 Adds
+
+Phase 6 makes the RAG system measurable. A generated answer can look convincing even when
+the wrong source chunks were retrieved, so this phase evaluates retrieval before judging
+answer wording.
+
+For each test question, you write a few terms that should appear in a relevant source chunk.
+The evaluator retrieves the top `K` chunks and reports:
+
+- `Hit@K`: the fraction of questions for which at least one of the top `K` chunks contains
+  a relevant term
+- `MRR` (Mean Reciprocal Rank): a score that is higher when the first relevant chunk appears
+  closer to the top of the results
+
+This is a lightweight manual benchmark, appropriate for a learning project. It is not a
+full production-grade evaluation system or an LLM-as-a-judge system.
 
 ## Phase 1 Tech Stack
 
@@ -375,11 +393,49 @@ To train the classifier:
 This uses:
 
 - sample dataset: `data/training/intent_router.sample.jsonl`
-- default base model: `bert-base-uncased`
-- default tokenizer: `bert-base-uncased`
+- default base model: `prajjwal1/bert-tiny`
+- default tokenizer: `prajjwal1/bert-tiny`
 - output directory: `data/processed/ml/intent_router`
 
 After training, the auto-route mode will start using the trained classifier automatically.
+
+## Run The Phase 6 Retrieval Evaluation
+
+First, upload material that matches the evaluation questions. The included sample file uses
+stack and queue terminology, so it is only useful after indexing course material about those
+topics. For your own subject, copy and edit the sample dataset.
+
+Each line in [data/evaluation/retrieval_eval.sample.jsonl](<C:\Users\User\Desktop\personal\ai learning\data\evaluation\retrieval_eval.sample.jsonl>) is JSON with:
+
+```json
+{"query":"What is the order of processing in a stack?","expected_terms":["LIFO","stack"]}
+```
+
+Run the evaluator from the project root after Ollama is running:
+
+```powershell
+.venv\Scripts\python.exe scripts\evaluate_retrieval.py
+```
+
+The script retrieves the configured top 4 chunks, prints the rank of the first relevant
+chunk for every question, and saves a report to:
+
+```text
+data/processed/evaluation/retrieval_metrics.json
+```
+
+To compare a different number of retrieved chunks, for example 8:
+
+```powershell
+.venv\Scripts\python.exe scripts\evaluate_retrieval.py --top-k 8
+```
+
+Use the result to tune one setting at a time, such as `TOP_K`, chunk size, or overlap. Then
+run the same evaluation dataset again and compare the scores. This is the experimental loop:
+
+```text
+Upload material -> write test questions -> measure retrieval -> change one setting -> measure again
+```
 
 ### Good first test file
 
@@ -563,13 +619,23 @@ Phase 5 is working when:
 4. if the model is missing or uncertain, the app still falls back safely
 5. the router behavior is now partly learned rather than fully hard-coded
 
-## What Comes After Phase 4
+## How To Know Phase 6 Is Really Done
+
+Phase 6 is working when:
+
+1. you have created 10 to 20 realistic questions for one uploaded course module
+2. every question has a few expected terms from the correct source material
+3. `scripts/evaluate_retrieval.py` runs and writes a JSON report
+4. you can explain `Hit@K` and `MRR` in your own words
+5. you changed one RAG setting, reran the benchmark, and recorded whether retrieval improved
+
+## What Comes Next
 
 After this, the next steps are:
 
-1. improve OCR quality, routing quality, and prompt quality
-2. optionally add direct vision question answering later
-3. add a second ML component closer to retrieval quality, such as a reranker
+1. improve weak results using the Phase 6 measurements
+2. add a second ML component closer to retrieval quality, such as a reranker
+3. optionally add direct vision question answering later
 
 ## Official References
 

@@ -1,0 +1,20 @@
+{"query":"What is an abstract data type?","expected_terms":["abstract data type","ADT","data characteristics"]}
+{"query":"Why does abstraction matter when designing an ADT?","expected_terms":["abstraction","implementation details","data structure"]}
+{"query":"What is the order of processing in a stack?","expected_terms":["LIFO","last-in-first-out"]}
+{"query":"Which stack operation removes the top item?","expected_terms":["pop","top of the stack"]}
+{"query":"Which queue operation removes an item?","expected_terms":["dequeue","remove from the front"]}
+{"query":"What is the processing order of a queue?","expected_terms":["FIFO","first-in-first-out"]}
+{"query":"How are stacks and queues different?","expected_terms":["LIFO","FIFO"]}
+{"query":"What is the advantage of an array implementation?","expected_terms":["contiguous","constant time","index"]}
+{"query":"How is a linked list different from an array?","expected_terms":["nodes","references","linked list"]}
+{"query":"What does Big O notation describe?","expected_terms":["Big O","growth rate","efficiency"]}
+{"query":"What is the base case in recursion?","expected_terms":["base case","recursive call"]}
+{"query":"Why can a recursive method stop?","expected_terms":["base case","termination"]}
+{"query":"When can binary search be used?","expected_terms":["sorted","binary search","middle"]}
+{"query":"How does linear search find a target item?","expected_terms":["linear search","sequential","one at a time"]}
+{"query":"What is a sorted list?","expected_terms":["sorted list","ordering","ordered"]}
+{"query":"Why is insertion into a sorted list more difficult?","expected_terms":["correct position","sorted order","insertion"]}
+{"query":"What is the purpose of a sorting algorithm?","expected_terms":["sorting","order","ascending"]}
+{"query":"What is a binary tree?","expected_terms":["binary tree","left child","right child"]}
+{"query":"What does a hash function do?","expected_terms":["hash function","hash code","index"]}
+{"query":"What happens when two keys have the same hash value?","expected_terms":["collision","same hash","hash table"]}
